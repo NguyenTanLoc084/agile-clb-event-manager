@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Quản lý Câu lạc bộ - Kiểm tra Khóa</title>
+    <style>
+        /* Định dạng cơ bản cho giao diện */
+        body { font-family: Arial, sans-serif; margin: 50px; }
+        .form-group { margin-bottom: 15px; width: 300px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        
+        input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            outline: none;
+        }
+
+        /* Lớp CSS khi có lỗi */
+        .input-error { border: 2px solid red; background-color: #fff0f0; }
+        
+        /* Tin nhắn cảnh báo */
+        #error-msg {
+            color: red;
+            font-size: 13px;
+            margin-top: 5px;
+            display: none; /* Mặc định ẩn đi */
+        }
+    </style>
+</head>
+<body>
+
+    <h2>Thêm thành viên CLB</h2>
+    
+    <div class="form-group">
+        <label for="khoaInput">Khóa sinh viên (VD: K50):</label>
+        <input type="text" id="khoaInput" placeholder="Nhập khóa..." onkeyup="validateKhoa()">
+        <div id="error-msg">⚠️ Sai định dạng! Khóa phải có dạng Kxx (ví dụ: K50).</div>
+    </div>
+
+    <button id="btnSubmit" style="padding: 10px 20px;">Lưu thành viên</button>
+
+    <script>
+        function validateKhoa() {
+            // 1. Lấy giá trị từ ô nhập liệu
+            const inputField = document.getElementById('khoaInput');
+            const errorText = document.getElementById('error-msg');
+            const btn = document.getElementById('btnSubmit');
+            
+            // Tiêu chí 1: Viết biểu thức chính quy (Regex)
+            const regex = /^K\d{2}$/;
+
+            // 2. Kiểm tra định dạng
+            if (regex.test(inputField.value)) {
+                // Nếu ĐÚNG: Xóa cảnh báo đỏ
+                inputField.classList.remove('input-error');
+                errorText.style.display = 'none';
+                btn.disabled = false;
+            } else {
+                // Tiêu chí 2: Nếu SAI hiển thị cảnh báo đỏ
+                inputField.classList.add('input-error');
+                errorText.style.display = 'block';
+                btn.disabled = true; // Chặn bấm nút lưu
+            }
+            
+            // Trường hợp ô trống thì ẩn lỗi cho đẹp
+            if (inputField.value === "") {
+                inputField.classList.remove('input-error');
+                errorText.style.display = 'none';
+            }
+        }
+    </script>
+
+</body>
+</html>
