@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Quản lý sự kiện</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ccc; padding: 10px; text-align: left; }
+        th { background-color: #f4f4f4; }
+        .controls { margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+
+    <h2>Danh sách sinh viên đăng ký</h2>
+
+    <div class="controls">
+        <label for="eventFilter"><strong>Lọc theo sự kiện:</strong></label>
+        <select id="eventFilter" onchange="renderTable()">
+            <option value="All">Tất cả sự kiện</option>
+            <option value="AI Workshop">AI Workshop</option>
+            <option value="Code Camp 2026">Code Camp 2026</option>
+        </select>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>STT</th>
+                <th>Mã Sinh Viên</th>
+                <th>Họ và Tên</th>
+                <th>Sự kiện tham gia</th>
+            </tr>
+        </thead>
+        <tbody id="tableBody">
+            </tbody>
+    </table>
+
+    <script>
+        let participantsData = [];
+
+        // Tiêu chí 4: Kiểm tra quyền đăng nhập ở phía Client
+        function checkAuth() {
+            // Giả lập việc lấy token sau khi admin đăng nhập thành công
+            const token = localStorage.getItem('admin_token'); 
+            
+            // Nếu chưa đăng nhập (không có token), đá văng về trang login
+            if (!token) {
+                alert("Bạn cần đăng nhập với tư cách Admin để xem trang này!");
+                window.location.href = "login.html"; // Chuyển hướng
+                return false;
+            }
+            return token;
+        }
+
+        // Tiêu chí 2: Gọi API GET dữ liệu
+        async function fetchParticipants() {
+            const token = checkAuth();
+            if (!token) return;
+
+            try {
+                const response = await fetch('http://127.0.0.1:5000/api/participants', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.status === 403) {
+                    alert("Tài khoản của bạn không có quyền Admin!");
+                    return;
+                }
+
+                participantsData = await response.json();
+                renderTable(); // Gọi hàm vẽ bảng sau khi có data
+            } catch (error) {
+                console.error("Lỗi khi tải dữ liệu:", error);
+            }
+        }
+
+        // Tiêu chí 1 & 3: Render bảng và áp dụng bộ lọc
+        function renderTable() {
+            const filterValue = document.getElementById('eventFilter').value;
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = ""; // Xóa dữ liệu cũ
+
+            // Lọc dữ liệu
+            const filteredData = filterValue === "All" 
+                ? participantsData 
+                : participantsData.filter(p => p.event === filterValue);
+
+            // Đổ dữ liệu vào bảng
+            filteredData.forEach((p, index) => {
+                const row = `<tr>
+                    <td>${index + 1}</td>
+                    <td>${p.student_id}</td>
+                    <td>${p.name}</td>
+                    <td>${p.event}</td>
+                </tr>`;
+                tbody.innerHTML += row;
+            });
+        }
+
+        localStorage.setItem('admin_token', 'admin_secret_token');
+
+        // Chạy hàm lấy dữ liệu khi trang vừa load xong
+        window.onload = fetchParticipants;
+    </script>
+</body>
+</html>
