@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Trang Quản Trị Admin</title>
+</head>
+<body style="display: none;"> <h1>Chào mừng Admin!</h1>
+    <p>Đây là trang nội bộ. Chỉ người có Token hợp lệ mới thấy được dòng này.</p>
+    <button onclick="logout()">Đăng xuất</button>
+
+    <script>
+        // Duy trì trạng thái và Verify bảo mật trên trang đích
+        window.onload = async function() {
+            const token = localStorage.getItem('admin_token');
+            
+            if (!token) {
+                alert("Vui lòng đăng nhập!");
+                window.location.href = 'login.html';
+                return;
+            }
+
+            try {
+                // Gọi API để Verify token thực tế thay vì chỉ check localStorage
+                const response = await fetch('http://localhost:3000/api/verify-token', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    // Token hợp lệ, hiển thị trang web
+                    document.body.style.display = "block";
+                } else {
+                    // Token sai hoặc hết hạn
+                    alert("Phiên đăng nhập hết hạn hoặc không hợp lệ!");
+                    localStorage.removeItem('admin_token');
+                    window.location.href = 'login.html';
+                }
+            } catch (err) {
+                console.error("Lỗi server", err);
+            }
+        };
+
+        function logout() {
+            localStorage.removeItem('admin_token');
+            window.location.href = 'login.html';
+        }
+    </script>
+</body>
+</html>
