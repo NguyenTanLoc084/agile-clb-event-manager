@@ -1,0 +1,16 @@
+[
+  {
+    "id": "1711245600000",
+    "name": "Hội thảo Agile Team",
+    "time": "2026-03-26T08:30",
+    "location": "Phòng Hội trường A",
+    "description": "Chia sẻ về quy trình làm việc nhóm hiệu quả."
+  },
+  {
+    "id": "1711245600001",
+    "name": "Workshop ReactJS",
+    "time": "2026-03-28T14:00",
+    "location": "Phòng Lab 01",
+    "description": "Hướng dẫn xây dựng component cơ bản."
+  }
+]
