@@ -103,10 +103,14 @@
             });
         }
 
-        localStorage.setItem('admin_token', 'admin_secret_token');
+        // Chạy khi trang load xong
+window.onload = () => {
+    // giả lập admin đã login
+    localStorage.setItem('admin_token', 'admin_secret_token');
 
-        // Chạy hàm lấy dữ liệu khi trang vừa load xong
-        window.onload = fetchParticipants;
+    // sau khi có token mới gọi API
+    fetchParticipants();
+};
     </script>
 </body>
 </html>
