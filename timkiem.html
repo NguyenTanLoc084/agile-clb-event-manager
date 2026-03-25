@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Quản lý người tham gia</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; line-height: 1.6; }
+        .search-box { margin-bottom: 20px; }
+        input { padding: 8px; width: 300px; border: 1px solid #ccc; border-radius: 4px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+        th { background-color: #f4f4f4; }
+        .no-result { color: red; text-align: center; padding: 20px; display: none; }
+        tr:hover { background-color: #f9f9f9; }
+    </style>
+</head>
+<body>
+
+    <h2>Danh sách người tham gia</h2>
+
+    <div class="search-box">
+        <input type="text" id="searchInput" placeholder="Tìm theo Họ tên hoặc Email...">
+        <button onclick="handleSearch()">Tìm kiếm</button>
+    </div>
+
+    <table id="participantTable">
+        <thead>
+            <tr>
+                <th>Họ tên</th>
+                <th>Email</th>
+            </tr>
+        </thead>
+        <tbody id="tableBody">
+            </tbody>
+    </table>
+
+    <div id="notFound" class="no-result">Không tìm thấy dữ liệu phù hợp</div>
+
+    <script src="timkiem.js"></script>
+</body>
+</html>
