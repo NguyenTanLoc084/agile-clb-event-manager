@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin - Check-in Sự Kiện</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="p-4 bg-light">
+    <div class="container bg-white p-4 shadow-sm rounded">
+        <h4 class="mb-4 text-success fw-bold">✅ Điểm danh Sinh viên (SCRUM-31)</h4>
+        <table class="table table-hover border text-center align-middle">
+            <thead class="table-dark">
+                <tr><th>MSSV</th><th>Họ và Tên</th><th>Trạng thái</th><th>Thao tác</th></tr>
+            </thead>
+            <tbody id="list"></tbody>
+        </table>
+    </div>
+
+    <script>
+        function load() {
+            fetch('/api/students').then(r => r.json()).then(data => {
+                document.getElementById('list').innerHTML = data.map(sv => `
+                    <tr class="${sv.isAttended ? 'table-success' : ''}">
+                        <td class="fw-bold">${sv.mssv}</td>
+                        <td>${sv.name}</td>
+                        <td>
+                            ${sv.isAttended 
+                                ? '<span class="badge bg-success">Đã tham gia</span>' 
+                                : '<span class="badge bg-danger">Vắng mặt</span>'}
+                        </td>
+                        <td>
+                            <button class="btn btn-${sv.isAttended ? 'secondary' : 'primary'} btn-sm fw-bold" 
+                                    onclick="toggleCheckin('${sv.id}')">
+                                ${sv.isAttended ? 'Hủy Check-in' : 'Check-in ngay'}
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+            });
+        }
+
+        // Gọi API Check-in và load lại bảng
+        function toggleCheckin(id) {
+            fetch(`/api/students/${id}/checkin`, { method: 'PUT' })
+            .then(() => load()); 
+        }
+
+        load();
+    </script>
+</body>
+</html>
