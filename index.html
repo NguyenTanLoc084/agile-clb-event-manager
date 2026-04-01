@@ -147,37 +147,42 @@
                 return;
             }
 
-            try {
-                // Đổi nút thành trạng thái loading để UX tốt hơn
-                const btn = document.getElementById('btn-check');
-                btn.innerText = 'Đang kiểm tra...';
-                btn.disabled = true;
+            // Thay thế đoạn logic fetch cũ trong sự kiện click nút btn-check:
+try {
+    const btn = document.getElementById('btn-check');
+    btn.innerText = 'Đang kiểm tra...';
+    btn.disabled = true;
 
-                // Fetch dữ liệu từ file json (Trong thực tế sẽ là gọi API)
-                const response = await fetch('participants.json');
-                const participants = await response.json();
+    // Gọi API Backend vừa viết
+    const response = await fetch('/api/check-ticket', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ ticketCode: ticketCode })
+    });
 
-                // So khớp mã vé
-                const user = participants.find(p => p.ticketCode === ticketCode);
+    const result = await response.json();
 
-                if (user) {
-                    if (user.status === 'valid') {
-                        showResult('Hợp lệ!', `Chào mừng ${user.name} đến với sự kiện.`, 'var(--success)');
-                        // Ở đây có thể thêm logic gọi API update status thành 'checked-in'
-                    } else if (user.status === 'checked-in') {
-                        showResult('Cảnh báo!', `Vé của ${user.name} đã được check-in trước đó.`, 'var(--warning)');
-                    }
-                } else {
-                    showResult('Không tìm thấy!', 'Mã vé không tồn tại trong hệ thống.', 'var(--error)');
-                }
+    if (result.success) {
+        showResult('Thành công!', result.message, 'var(--success)');
+    } else {
+        // Phân loại lỗi dựa trên HTTP status code
+        if (response.status === 409) {
+            showResult('Cảnh báo!', result.message, 'var(--warning)');
+        } else {
+            showResult('Lỗi!', result.message, 'var(--error)');
+        }
+    }
 
-                // Reset UI
-                btn.innerText = 'Kiểm tra vé';
-                btn.disabled = false;
-                inputEl.value = ''; // Xóa trắng ô input để check người tiếp theo
-                inputEl.focus(); // Tự động bật lại bàn phím
+    // Reset UI
+    btn.innerText = 'Kiểm tra vé';
+    btn.disabled = false;
+    inputEl.value = '';
+    inputEl.focus();
 
             } catch (error) {
+
                 console.error("Lỗi khi đọc dữ liệu:", error);
                 showResult('Lỗi hệ thống', 'Không thể kết nối đến cơ sở dữ liệu.', 'var(--error)');
                 document.getElementById('btn-check').innerText = 'Kiểm tra vé';
