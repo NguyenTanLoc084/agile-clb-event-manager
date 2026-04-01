@@ -1,0 +1,17 @@
+[
+    {
+        "ticketCode": "EVT001",
+        "name": "Nguyễn Văn A",
+        "status": "valid"
+    },
+    {
+        "ticketCode": "EVT002",
+        "name": "Trần Thị B",
+        "status": "checked-in"
+    },
+    {
+        "ticketCode": "EVT003",
+        "name": "Lê Văn C",
+        "status": "valid"
+    }
+]

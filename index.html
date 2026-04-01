@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Check-in Event CLB</title>
+    <style>
+        :root {
+            --primary: #4F46E5;
+            --success: #10B981;
+            --error: #EF4444;
+            --warning: #F59E0B;
+            --bg: #F3F4F6;
+            --surface: #FFFFFF;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: #1F2937;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden; /* Ngăn cuộn trang không cần thiết */
+        }
+
+        /* Phần hiển thị thông tin ở trên */
+        .content-area {
+            flex: 1;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 { font-size: 24px; margin-bottom: 8px; }
+        .header p { color: #6B7280; font-size: 14px; }
+
+        .result-card {
+            width: 100%;
+            padding: 20px;
+            border-radius: 16px;
+            text-align: center;
+            background: var(--surface);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.3s ease;
+            display: none;
+        }
+
+        .result-card.show {
+            opacity: 1;
+            transform: translateY(0);
+            display: block;
+        }
+
+        /* AC2: Tối ưu thao tác 1 tay - Đẩy toàn bộ action xuống dưới cùng */
+        .action-sheet {
+            background-color: var(--surface);
+            padding: 24px 20px 32px 20px;
+            border-top-left-radius: 24px;
+            border-top-right-radius: 24px;
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08);
+            padding-bottom: env(safe-area-inset-bottom, 32px); /* Hỗ trợ tai thỏ/bottom bar của iPhone */
+        }
+
+        /* Input to, dễ chạm */
+        .input-group input {
+            width: 100%;
+            padding: 18px 20px;
+            font-size: 18px;
+            border: 2px solid #E5E7EB;
+            border-radius: 16px;
+            outline: none;
+            transition: border-color 0.2s;
+            text-align: center;
+            text-transform: uppercase;
+        }
+
+        .input-group input:focus {
+            border-color: var(--primary);
+        }
+
+        /* Button to bự, bo góc, nằm trong vùng vươn tới của ngón cái */
+        .btn-check {
+            width: 100%;
+            margin-top: 16px;
+            padding: 18px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 16px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .btn-check:active {
+            opacity: 0.8;
+            transform: scale(0.98);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="content-area">
+        <div class="header">
+            <h1>Quản Lý Sự Kiện</h1>
+            <p>Trạm Check-in Sinh Viên</p>
+        </div>
+        
+        <div id="result" class="result-card">
+            <h2 id="result-title" style="margin-bottom: 8px;"></h2>
+            <p id="result-desc" style="color: #4B5563;"></p>
+        </div>
+    </div>
+
+    <div class="action-sheet">
+        <div class="input-group">
+            <input type="text" id="ticket-input" placeholder="Nhập mã vé..." autocomplete="off" autocorrect="off" autocapitalize="characters">
+        </div>
+        <button class="btn-check" id="btn-check">Kiểm tra vé</button>
+    </div>
+
+    <script>
+        // AC1: Logic Fetch data và so khớp mã vé
+        document.getElementById('btn-check').addEventListener('click', async () => {
+            const inputEl = document.getElementById('ticket-input');
+            const ticketCode = inputEl.value.trim().toUpperCase();
+            
+            if (!ticketCode) {
+                showResult('Lỗi!', 'Vui lòng nhập mã vé.', 'var(--warning)');
+                return;
+            }
+
+            try {
+                // Đổi nút thành trạng thái loading để UX tốt hơn
+                const btn = document.getElementById('btn-check');
+                btn.innerText = 'Đang kiểm tra...';
+                btn.disabled = true;
+
+                // Fetch dữ liệu từ file json (Trong thực tế sẽ là gọi API)
+                const response = await fetch('participants.json');
+                const participants = await response.json();
+
+                // So khớp mã vé
+                const user = participants.find(p => p.ticketCode === ticketCode);
+
+                if (user) {
+                    if (user.status === 'valid') {
+                        showResult('Hợp lệ!', `Chào mừng ${user.name} đến với sự kiện.`, 'var(--success)');
+                        // Ở đây có thể thêm logic gọi API update status thành 'checked-in'
+                    } else if (user.status === 'checked-in') {
+                        showResult('Cảnh báo!', `Vé của ${user.name} đã được check-in trước đó.`, 'var(--warning)');
+                    }
+                } else {
+                    showResult('Không tìm thấy!', 'Mã vé không tồn tại trong hệ thống.', 'var(--error)');
+                }
+
+                // Reset UI
+                btn.innerText = 'Kiểm tra vé';
+                btn.disabled = false;
+                inputEl.value = ''; // Xóa trắng ô input để check người tiếp theo
+                inputEl.focus(); // Tự động bật lại bàn phím
+
+            } catch (error) {
+                console.error("Lỗi khi đọc dữ liệu:", error);
+                showResult('Lỗi hệ thống', 'Không thể kết nối đến cơ sở dữ liệu.', 'var(--error)');
+                document.getElementById('btn-check').innerText = 'Kiểm tra vé';
+                document.getElementById('btn-check').disabled = false;
+            }
+        });
+
+        // Hàm hỗ trợ hiển thị thông báo
+        function showResult(title, desc, color) {
+            const resultCard = document.getElementById('result');
+            const resultTitle = document.getElementById('result-title');
+            const resultDesc = document.getElementById('result-desc');
+
+            resultTitle.innerText = title;
+            resultTitle.style.color = color;
+            resultDesc.innerText = desc;
+
+            resultCard.classList.remove('show');
+            // Trigger reflow để animation chạy lại mượt mà
+            void resultCard.offsetWidth; 
+            resultCard.classList.add('show');
+        }
+
+        // Cho phép ấn Enter trên bàn phím điện thoại để check nhanh
+        document.getElementById('ticket-input').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                document.getElementById('btn-check').click();
+                // Ẩn bàn phím đi sau khi enter để nhìn rõ thông báo (tuỳ chọn)
+                this.blur(); 
+            }
+        });
+    </script>
+</body>
+</html>
