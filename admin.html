@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Event Manager</title>
+    <style>
+        :root {
+            --primary: #4F46E5;
+            --secondary: #8B5CF6;
+            --bg-color: #F3F4F6;
+            --card-bg: #FFFFFF;
+            --text-main: #1F2937;
+            --text-muted: #6B7280;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            padding: 32px;
+        }
+
+        .dashboard-header {
+            margin-bottom: 32px;
+        }
+
+        .dashboard-header h1 {
+            font-size: 28px;
+            color: var(--text-main);
+        }
+
+        /* AC2: Thiết kế các ô hiển thị con số tổng quan */
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            padding: 24px;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            border-left: 5px solid var(--primary);
+        }
+
+        .card.secondary {
+            border-left-color: var(--secondary);
+        }
+
+        .card-title {
+            font-size: 14px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .card-value {
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        /* Bảng chi tiết sự kiện */
+        .details-section {
+            background: var(--card-bg);
+            padding: 24px;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+
+        .details-section h2 {
+            font-size: 18px;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #E5E7EB;
+        }
+
+        .event-list {
+            list-style: none;
+        }
+
+        .event-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px dashed #E5E7EB;
+        }
+
+        .event-item:last-child {
+            border-bottom: none;
+        }
+
+        .event-name {
+            font-weight: 500;
+        }
+
+        .event-count {
+            background: #EEF2FF;
+            color: var(--primary);
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="dashboard-header">
+        <h1>Tổng quan sự kiện CLB</h1>
+    </div>
+
+    <div class="summary-cards">
+        <div class="card">
+            <div class="card-title">Tổng số sự kiện</div>
+            <div class="card-value" id="total-events">0</div>
+        </div>
+        <div class="card secondary">
+            <div class="card-title">Tổng sinh viên đăng ký</div>
+            <div class="card-value" id="total-students">0</div>
+        </div>
+    </div>
+
+    <div class="details-section">
+        <h2>Chi tiết số lượng đăng ký</h2>
+        <ul class="event-list" id="event-list">
+            <li style="color: #6B7280; font-size: 14px;">Đang tải dữ liệu...</li>
+        </ul>
+    </div>
+
+    <script>
+        // AC1: Hàm đếm tổng số sinh viên đăng ký từ JSON
+        function calculateTotalStudents(eventsArray) {
+            // Sử dụng reduce để duyệt mảng và cộng dồn số lượng sinh viên
+            return eventsArray.reduce((total, event) => {
+                return total + event.registeredStudents;
+            }, 0);
+        }
+
+        // Hàm render dữ liệu ra giao diện
+        function renderDashboard(events) {
+            // Cập nhật các ô tổng quan (Cards)
+            const totalEvents = events.length;
+            const totalStudents = calculateTotalStudents(events);
+
+            // Tạo hiệu ứng số chạy nhẹ cho đẹp mắt (tuỳ chọn)
+            document.getElementById('total-events').innerText = totalEvents;
+            document.getElementById('total-students').innerText = totalStudents;
+
+            // Render danh sách chi tiết
+            const listElement = document.getElementById('event-list');
+            listElement.innerHTML = ''; // Xóa chữ "Đang tải dữ liệu..."
+
+            events.forEach(event => {
+                const li = document.createElement('li');
+                li.className = 'event-item';
+                li.innerHTML = `
+                    <span class="event-name">${event.eventName} <small style="color: #9CA3AF">(${event.eventId})</small></span>
+                    <span class="event-count">${event.registeredStudents} sinh viên</span>
+                `;
+                listElement.appendChild(li);
+            });
+        }
+
+        // Gọi dữ liệu khi trang vừa load xong
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const response = await fetch('events-data.json');
+                if (!response.ok) throw new Error('Network response was not ok');
+                
+                const data = await response.json();
+                renderDashboard(data);
+                
+            } catch (error) {
+                console.error("Lỗi khi tải dữ liệu:", error);
+                document.getElementById('event-list').innerHTML = `
+                    <li style="color: red;">Lỗi: Không thể tải dữ liệu JSON. Đảm bảo bạn đang chạy trên Live Server.</li>
+                `;
+            }
+        });
+    </script>
+</body>
+</html>

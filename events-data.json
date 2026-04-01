@@ -1,0 +1,20 @@
+[
+    {
+        "eventId": "EVT001",
+        "eventName": "Workshop: Nhập môn Deep Learning",
+        "registeredStudents": 145,
+        "status": "upcoming"
+    },
+    {
+        "eventId": "EVT002",
+        "eventName": "Seminar: Kỹ năng thuyết trình",
+        "registeredStudents": 82,
+        "status": "completed"
+    },
+    {
+        "eventId": "EVT003",
+        "eventName": "Giao lưu thành viên CLB",
+        "registeredStudents": 50,
+        "status": "upcoming"
+    }
+]
