@@ -141,55 +141,50 @@
     </div>
 
     <script>
-        // AC1: Hàm đếm tổng số sinh viên đăng ký từ JSON
-        function calculateTotalStudents(eventsArray) {
-            // Sử dụng reduce để duyệt mảng và cộng dồn số lượng sinh viên
-            return eventsArray.reduce((total, event) => {
-                return total + event.registeredStudents;
-            }, 0);
-        }
+    // Hàm render dữ liệu ra giao diện (AC2)
+    function renderDashboard(dashboardData) {
+        const summary = dashboardData.summary;
+        const eventsList = dashboardData.eventsList;
 
-        // Hàm render dữ liệu ra giao diện
-        function renderDashboard(events) {
-            // Cập nhật các ô tổng quan (Cards)
-            const totalEvents = events.length;
-            const totalStudents = calculateTotalStudents(events);
+        // Cập nhật các ô tổng quan
+        document.getElementById('total-events').innerText = summary.totalEvents;
+        document.getElementById('total-students').innerText = summary.totalStudents;
 
-            // Tạo hiệu ứng số chạy nhẹ cho đẹp mắt (tuỳ chọn)
-            document.getElementById('total-events').innerText = totalEvents;
-            document.getElementById('total-students').innerText = totalStudents;
+        // Render danh sách chi tiết
+        const listElement = document.getElementById('event-list');
+        listElement.innerHTML = ''; // Xóa chữ "Đang tải dữ liệu..."
 
-            // Render danh sách chi tiết
-            const listElement = document.getElementById('event-list');
-            listElement.innerHTML = ''; // Xóa chữ "Đang tải dữ liệu..."
-
-            events.forEach(event => {
-                const li = document.createElement('li');
-                li.className = 'event-item';
-                li.innerHTML = `
-                    <span class="event-name">${event.eventName} <small style="color: #9CA3AF">(${event.eventId})</small></span>
-                    <span class="event-count">${event.registeredStudents} sinh viên</span>
-                `;
-                listElement.appendChild(li);
-            });
-        }
-
-        // Gọi dữ liệu khi trang vừa load xong
-        document.addEventListener('DOMContentLoaded', async () => {
-            try {
-                const response = await fetch('events-data.json');
-                if (!response.ok) throw new Error('Network response was not ok');
-                
-                const data = await response.json();
-                renderDashboard(data);
-                
-            } catch (error) {
-                console.error("Lỗi khi tải dữ liệu:", error);
-                document.getElementById('event-list').innerHTML = `
-                    <li style="color: red;">Lỗi: Không thể tải dữ liệu JSON. Đảm bảo bạn đang chạy trên Live Server.</li>
-                `;
-            }
+        eventsList.forEach(event => {
+            const li = document.createElement('li');
+            li.className = 'event-item';
+            li.innerHTML = `
+                <span class="event-name">${event.eventName} <small style="color: #9CA3AF">(${event.eventId})</small></span>
+                <span class="event-count">${event.registeredStudents} sinh viên</span>
+            `;
+            listElement.appendChild(li);
         });
-    </script>
+    }
+
+    // Gọi API Backend khi trang vừa load xong
+    document.addEventListener('DOMContentLoaded', async () => {
+        try {
+            // Gọi vào API endpoint ta vừa tạo trong server.js
+            const response = await fetch('/api/dashboard-stats');
+            const result = await response.json();
+
+            if (result.success) {
+                renderDashboard(result.data);
+            } else {
+                throw new Error(result.message);
+            }
+            
+        } catch (error) {
+            console.error("Lỗi khi tải dữ liệu:", error);
+            document.getElementById('event-list').innerHTML = `
+                <li style="color: red;">Lỗi: Không thể kết nối đến Server. Đảm bảo server.js đang chạy.</li>
+            `;
+        }
+    });
+</script>
 </body>
 </html>
