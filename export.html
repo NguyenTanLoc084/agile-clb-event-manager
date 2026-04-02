@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demo Chức Năng Xuất Excel - Quản Lý CLB</title>
+    
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f6f9;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h2 { color: #333; margin-bottom: 5px; }
+        p { color: #666; margin-top: 0; }
+
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            width: 80%;
+            max-width: 900px;
+        }
+
+        .action-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 15px;
+        }
+
+        /* Nút Xuất Excel */
+        button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background-color 0.3s, transform 0.1s;
+        }
+
+        /* Màu xanh lá cho Excel */
+        #exportBtn {
+            background-color: #28a745;
+            color: white;
+        }
+
+        #exportBtn:hover { background-color: #218838; }
+        #exportBtn:active { transform: scale(0.98); }
+
+        /* Icon Excel đơn giản bằng CSS */
+        .excel-icon::before {
+            content: "\1F4D6"; /* Unicode cho book */
+            font-size: 1.2em;
+        }
+
+        /* Bảng dữ liệu */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 15px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #007bff;
+            color: white;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 14px;
+        }
+
+        tr:hover { background-color: #f1f1f1; }
+
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            color: white;
+        }
+
+        .status-active { background-color: #28a745; }
+        .status-inactive { background-color: #dc3545; }
+
+        #statusMessage {
+            margin-top: 15px;
+            font-weight: bold;
+            min-height: 20px;
+        }
+        .success { color: #28a745; }
+        .error { color: #dc3545; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="action-bar">
+            <div>
+                <h2>Danh Sách Thành Viên Câu Lạc Bộ</h2>
+                <p>Hệ Thống Quản Lý CLB Agile - SCRUM-EXCEL Demo</p>
+            </div>
+            <button id="exportBtn">
+                <span class="excel-icon"></span>
+                Xuất Thống Kê Ra Excel
+            </button>
+        </div>
+
+        <table id="membersTable">
+            <thead>
+                <tr>
+                    <th>STT</th>
+                    <th>Họ và Tên</th>
+                    <th>Email</th>
+                    <th>Chức vụ</th>
+                    <th>Trạng thái</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+                </tbody>
+        </table>
+        <div id="statusMessage"></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+    <script>
+        // --- DỮ LIỆU GIẢ LẬP ---
+        const listData = [
+            { id: 1, name: 'Lê Thế Bảo', email: 'bao@gmail.com', role: 'Admin', active: true },
+            { id: 2, name: 'Nguyễn Tấn Lộc', email: 'loc@gmail.com', role: 'Leader', active: true },
+            { id: 3, name: 'Trần Văn An', email: 'an.tran@student.edu.vn', role: 'Thành viên', active: false },
+            { id: 4, name: 'Phạm Thị Bình', email: 'binh.pham@gmail.com', role: 'Thành viên', active: true },
+            { id: 5, name: 'Hoàng Minh Đức', email: 'duc.hm@clb.org', role: 'Thư ký', active: true }
+        ];
+
+        // --- HÀM XỬ LÝ CHÍNH ---
+
+        // 1. Load dữ liệu giả lập vào Table
+        function loadTableData() {
+            const tableBody = document.getElementById('tableBody');
+            tableBody.innerHTML = ''; // Clear dữ liệu cũ
+
+            listData.forEach(member => {
+                const row = `
+                    <tr>
+                        <td>${member.id}</td>
+                        <td>${member.name}</td>
+                        <td>${member.email}</td>
+                        <td>${member.role}</td>
+                        <td>
+                            <span class="status-badge ${member.active ? 'status-active' : 'status-inactive'}">
+                                ${member.active ? 'Hoạt động' : 'Tạm dừng'}
+                            </td>
+                    </tr>
+                `;
+                tableBody.insertAdjacentHTML('beforeend', row);
+            });
+        }
+
+        // 2. Hàm xử lý logic xuất Excel
+        // Lấy dữ liệu trực tiếp từ một Table HTML và xuất ra file .xlsx.
+        function exportToExcelFromTable(tableId, fileName = 'ThongKeCLB.xlsx') {
+            const table = document.getElementById(tableId);
+            const statusMessage = document.getElementById('statusMessage');
+
+            try {
+                // Hiển thị trạng thái đang xử lý
+                statusMessage.textContent = "Đang xử lý và tải file Excel...";
+                statusMessage.className = "";
+
+                // --- LOGIC XỬ LÝ EXCEL QUA THƯ VIỆN SheetJS ---
+
+                // 1. Chuyển Table HTML thành Worksheet
+                // Giữ nguyên tiêu đề và dữ liệu trong table.
+                const ws = XLSX.utils.table_to_sheet(table);
+
+                // 2. Tạo một Workbook mới
+                const wb = XLSX.utils.book_new();
+
+                // 3. Đưa Worksheet vào Workbook, đặt tên sheet
+                XLSX.utils.book_append_sheet(wb, ws, "Dữ liệu");
+
+                // 4. Xuất file và tải về máy
+                XLSX.writeFile(wb, fileName);
+
+                // Hiển thị trạng thái thành công
+                statusMessage.textContent = `Tải file "${fileName}" thành công!`;
+                statusMessage.className = "success";
+                
+                // Xóa tin nhắn sau 3 giây
+                setTimeout(() => {
+                    statusMessage.textContent = "";
+                    statusMessage.className = "";
+                }, 3000);
+
+            } catch (error) {
+                // Xử lý lỗi
+                statusMessage.textContent = `Lỗi: ${error.message}`;
+                statusMessage.className = "error";
+            }
+        }
+
+        // --- XỬ LÝ SỰ KIỆN CLICK ---
+        document.getElementById('exportBtn').addEventListener('click', function() {
+            // Gọi hàm xuất Excel từ table
+            exportToExcelFromTable('membersTable', 'DanhSachThanhVienCLB.xlsx');
+        });
+
+        // Load dữ liệu khi tải trang
+        loadTableData();
+    </script>
+
+</body>
+</html>
