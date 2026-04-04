@@ -1,1 +1,70 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>Check-in</title>
 
+<style>
+    body {
+        font-family: Arial;
+        background: linear-gradient(to right, #4facfe, #00f2fe);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+    }
+
+    .card {
+        background: white;
+        padding: 30px;
+        border-radius: 15px;
+        width: 320px;
+        text-align: center;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    }
+
+    input {
+        width: 100%;
+        padding: 10px;
+        margin-top: 10px;
+        border-radius: 8px;
+        border: 1px solid #ccc;
+    }
+
+    button {
+        margin-top: 15px;
+        padding: 10px;
+        width: 100%;
+        border: none;
+        border-radius: 8px;
+        background: #4facfe;
+        color: white;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    button:disabled {
+        background: gray;
+        cursor: not-allowed;
+    }
+
+    .success { color: green; margin-top: 15px; }
+    .error { color: red; margin-top: 15px; }
+</style>
+</head>
+
+<body>
+
+<div class="card">
+    <h2>🎫 Check-in</h2>
+
+    <input id="ticketCode" placeholder="Nhập mã vé..." />
+    <button id="btn" onclick="checkIn()">Check-in</button>
+
+    <p id="result"></p>
+</div>
+
+<script src="checkin.js"></script>
+
+</body>
+</html>
