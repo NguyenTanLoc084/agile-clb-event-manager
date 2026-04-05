@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+
+<div class="login-box">
+    <h2>🔐 Admin Login</h2>
+    <input type="password" id="password" placeholder="Nhập mật khẩu..." />
+    <button onclick="login()">Đăng nhập</button>
+    <p id="error"></p>
+</div>
+
+<div class="dashboard" id="dashboard" style="display:none;">
+    <h2>📊 Dashboard</h2>
+
+    <div class="card">
+        <h3>Tổng sự kiện</h3>
+        <p id="totalEvents">0</p>
+    </div>
+
+    <div class="card">
+        <h3>Tổng sinh viên</h3>
+        <p id="totalStudents">0</p>
+    </div>
+</div>
+
+<script src="admin.js"></script>
+
+</body>
+</html>
