@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tạo Sự Kiện</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body class="bg-light">
+    <div class="container my-5">
+        <div class="card shadow-sm p-4 mx-auto" style="max-width: 600px; border-radius: 15px;">
+            <h4 class="fw-bold mb-4 text-primary text-center">Tạo Sự Kiện Mới</h4>
+            
+            <form id="createEventForm">
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Tên sự kiện <span class="text-danger">*</span></label>
+                    <input type="text" id="eventName" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Thời gian <span class="text-danger">*</span></label>
+                    <input type="datetime-local" id="eventTime" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Địa điểm <span class="text-danger">*</span></label>
+                    <input type="text" id="eventLocation" class="form-control" required>
+                </div>
+                <div class="mb-4">
+                    <label class="form-label fw-semibold">Mô tả</label>
+                    <textarea id="eventDescription" class="form-control" rows="3"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary w-100 fw-bold">Lưu Sự Kiện</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('createEventForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const eventData = {
+                name: document.getElementById('eventName').value.trim(),
+                time: document.getElementById('eventTime').value,
+                location: document.getElementById('eventLocation').value.trim(),
+                description: document.getElementById('eventDescription').value.trim()
+            };
+
+            fetch('/api/events', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(eventData)
+            })
+            .then(res => res.json())
+            .then(data => {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Tạo thành công!',
+                    text: 'Sự kiện đã được lưu vào hệ thống.',
+                    showConfirmButton: false,
+                    timer: 2000
+                });
+                document.getElementById('createEventForm').reset();
+            })
+            .catch(err => {
+                Swal.fire({ icon: 'error', title: 'Lỗi kết nối' });
+            });
+        });
+    </script>
+</body>
+</html>
