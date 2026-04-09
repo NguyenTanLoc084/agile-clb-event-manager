@@ -1,0 +1,14 @@
+[
+  {
+    "id": "SV001",
+    "name": "Nguyễn Văn Thanh",
+    "mssv": "SE170001",
+    "isAttended": false
+  },
+  {
+    "id": "SV002",
+    "name": "Trần Thị B",
+    "mssv": "SE170002",
+    "isAttended": true
+  }
+]
